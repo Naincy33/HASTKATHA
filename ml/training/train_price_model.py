@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import os
+import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
@@ -9,6 +11,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from xgboost import XGBRegressor
 
+import pandas as pd
+import numpy as np
+import joblib
+
+from sklearn.model_selection import train_test_split
+...
 
 # ==========================================
 # 1. LOAD DATA
@@ -276,3 +284,67 @@ results.to_csv(
 )
 
 print("\nResults saved successfully!")
+
+
+# ==========================================
+# 11. TRAIN FINAL PRODUCTION MODEL
+# ==========================================
+
+print("\n========================================")
+print("TRAINING FINAL PRODUCTION MODEL")
+print("========================================")
+
+final_features = [
+    "product_name",
+    "material",
+    "product_type",
+    "mrp"
+]
+
+X_final = df[final_features]
+y_final = df["selling_price"]
+
+final_model = create_model(
+    use_mrp=True
+)
+
+final_model.fit(
+    X_final,
+    y_final
+)
+
+
+# ==========================================
+# 12. SAVE FINAL MODEL
+# ==========================================
+
+models_dir = "../models"
+
+os.makedirs(
+    models_dir,
+    exist_ok=True
+)
+
+model_path = os.path.join(
+    models_dir,
+    "price_model.pkl"
+)
+
+joblib.dump(
+    final_model,
+    model_path
+)
+
+print("\n========================================")
+print("FINAL MODEL SAVED")
+print("========================================")
+
+print("Model path:", model_path)
+print("Training samples:", len(X_final))
+print("Features:", final_features)
+print(
+    "Model:",
+    "XGBoost + TF-IDF + OneHotEncoder + MRP"
+)
+
+print("\nReady for inference!")

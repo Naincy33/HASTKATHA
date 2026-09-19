@@ -2,3 +2,27 @@ venv/
 .env
 __pycache__/
 *.pyc
+
+.env
+*.env
+
+
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# logs
+*.log
+
+# misc
+.DS_Store
