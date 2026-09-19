@@ -13,6 +13,7 @@ from app.routers import artisan
 from app.routers import product
 from app.routers import product_image
 from app.routers import order
+from app.routers import review
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
@@ -33,7 +34,7 @@ app.include_router(artisan.router)
 app.include_router(product.router)
 app.include_router(product_image.router)
 app.include_router(order.router)
-
+app.include_router(review.router)
 
 @app.get("/")
 def root():
