@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
+from app.models.product import Product
+
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.craft import Craft
@@ -168,3 +170,62 @@ def get_craft(
         )
 
     return craft
+
+# ============================================================
+# CRAFT DETAIL + PRODUCTS
+# ============================================================
+
+@router.get("/{craft_id}/details")
+def get_craft_details(
+    craft_id: int,
+    db: Session = Depends(get_db)
+):
+    craft = (
+        db.query(Craft)
+        .filter(Craft.id == craft_id)
+        .first()
+    )
+
+    if not craft:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Craft not found"
+        )
+
+    products = (
+        db.query(Product)
+        .filter(
+            Product.craft_id == craft_id,
+            Product.is_active == True
+        )
+        .all()
+    )
+
+    return {
+        "craft": {
+            "id": craft.id,
+            "name": craft.name,
+            "description": craft.description,
+            "state": craft.state,
+            "region": craft.region,
+            "material": craft.material,
+            "technique": craft.technique,
+            "gi_status": craft.gi_status,
+        },
+
+        "products": [
+            {
+                "id": product.id,
+                "name": product.name,
+                "description": product.description,
+                "price": product.price,
+                "stock": product.stock,
+                "material": product.material,
+                "dimensions": product.dimensions,
+                "production_time_days": product.production_time_days,
+                "artisan_id": product.artisan_id,
+                "craft_id": product.craft_id,
+            }
+            for product in products
+        ]
+    }
