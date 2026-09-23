@@ -580,6 +580,9 @@ __turbopack_context__.s([
     ()=>api
 ]);
 const API_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") || "http://127.0.0.1:8000";
+// ============================================================
+// GENERIC API FETCH
+// ============================================================
 async function apiFetch(endpoint, options) {
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
@@ -601,6 +604,56 @@ async function apiFetch(endpoint, options) {
     return response.json();
 }
 const api = {
+    // ==========================================================
+    // CRAFT EXPLORER
+    // ==========================================================
+    getCrafts: (params)=>{
+        const searchParams = new URLSearchParams();
+        if (params?.state) {
+            searchParams.set("state", params.state);
+        }
+        if (params?.gi_status) {
+            searchParams.set("gi_status", params.gi_status);
+        }
+        if (params?.search) {
+            searchParams.set("search", params.search);
+        }
+        searchParams.set("skip", String(params?.skip ?? 0));
+        searchParams.set("limit", String(params?.limit ?? 50));
+        return apiFetch(`/crafts/?${searchParams.toString()}`);
+    },
+    // ==========================================================
+    // SINGLE CRAFT
+    // ==========================================================
+    getCraft: (craftId)=>apiFetch(`/crafts/${craftId}`),
+    // ==========================================================
+    // CRAFT DETAIL + PRODUCTS
+    // ==========================================================
+    getCraftDetails: (craftId)=>apiFetch(`/crafts/${craftId}/details`),
+    getMyProducts: ()=>apiFetch("/products/my"),
+    // ==========================================================
+    // PRODUCT IMAGES
+    // ==========================================================
+    getProductImages: (productId)=>apiFetch(`/product-image/product/${productId}`),
+    // ==========================================================
+    // PRODUCT MARKETPLACE
+    // ==========================================================
+    getProducts: (params)=>{
+        const searchParams = new URLSearchParams();
+        if (params?.search) {
+            searchParams.set("search", params.search);
+        }
+        if (params?.craft_id) {
+            searchParams.set("craft_id", String(params.craft_id));
+        }
+        searchParams.set("skip", String(params?.skip ?? 0));
+        searchParams.set("limit", String(params?.limit ?? 50));
+        return apiFetch(`/products/?${searchParams.toString()}`);
+    },
+    getProduct: (productId)=>apiFetch(`/products/${productId}`),
+    // ==========================================================
+    // AI / RAG
+    // ==========================================================
     askAI: (question, topK = 5)=>apiFetch("/api/rag/ask", {
             method: "POST",
             body: JSON.stringify({
@@ -608,9 +661,10 @@ const api = {
                 top_k: topK
             })
         }),
-    /* =========================
-     PRICE ML
-  ========================= */ estimatePrice: (data)=>apiFetch("/api/ml/price-estimate", {
+    // ==========================================================
+    // PRICE ML
+    // ==========================================================
+    estimatePrice: (data)=>apiFetch("/api/ml/price-estimate", {
             method: "POST",
             body: JSON.stringify(data)
         })
