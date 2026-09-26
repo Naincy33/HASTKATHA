@@ -630,6 +630,9 @@ const api = {
     // CRAFT DETAIL + PRODUCTS
     // ==========================================================
     getCraftDetails: (craftId)=>apiFetch(`/crafts/${craftId}/details`),
+    // ==========================================================
+    // SELLER PRODUCTS
+    // ==========================================================
     getMyProducts: ()=>apiFetch("/products/my"),
     // ==========================================================
     // PRODUCT IMAGES
@@ -650,7 +653,54 @@ const api = {
         searchParams.set("limit", String(params?.limit ?? 50));
         return apiFetch(`/products/?${searchParams.toString()}`);
     },
+    // ==========================================================
+    // SINGLE PRODUCT
+    // ==========================================================
     getProduct: (productId)=>apiFetch(`/products/${productId}`),
+    // ==========================================================
+    // UPLOAD PRODUCT IMAGE
+    // ==========================================================
+    uploadProductImage: async (file)=>{
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch(`${API_URL}/upload/product-image`, {
+            method: "POST",
+            body: formData
+        });
+        if (!response.ok) {
+            let message = `Upload failed: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                message = errorData.detail || errorData.message || message;
+            } catch  {
+            // Response was not JSON.
+            }
+            throw new Error(message);
+        }
+        return response.json();
+    },
+    // ============================================================
+    // AI PRODUCT LISTING
+    // ============================================================
+    generateProductListing: async (file)=>{
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch(`${API_URL}/api/ai/generate-listing`, {
+            method: "POST",
+            body: formData
+        });
+        if (!response.ok) {
+            let message = `AI generation failed: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                message = errorData.detail || errorData.message || message;
+            } catch  {
+            // Response was not JSON
+            }
+            throw new Error(message);
+        }
+        return response.json();
+    },
     // ==========================================================
     // AI / RAG
     // ==========================================================

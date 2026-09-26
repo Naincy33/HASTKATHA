@@ -16,7 +16,13 @@ from app.routers import order
 from app.routers import review
 from app.routers import ml
 from app.routers import rag
+from app.routers import upload
+
+from app.routers import ai_listing
+
+from fastapi.staticfiles import StaticFiles
 # Create database tables
+
 Base.metadata.create_all(bind=engine)
 
 
@@ -24,6 +30,12 @@ app = FastAPI(
     title="HASTKATHA API",
     description="AI-powered digital ecosystem for Indian traditional crafts",
     version="1.0.0"
+)
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads",
 )
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +61,8 @@ app.include_router(order.router)
 app.include_router(review.router)
 app.include_router(ml.router)
 app.include_router(rag.router)
+app.include_router(upload.router)
+app.include_router(ai_listing.router)
 
 @app.get("/")
 def root():

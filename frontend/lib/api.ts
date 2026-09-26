@@ -10,7 +10,6 @@ async function apiFetch<T>(
 ): Promise<T> {
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
-
     headers: {
       "Content-Type": "application/json",
       ...(options?.headers || {}),
@@ -40,19 +39,12 @@ async function apiFetch<T>(
 
 export type Craft = {
   id: number;
-
   name: string;
-
   description?: string;
-
   state?: string;
-
   region?: string;
-
   material?: string;
-
   technique?: string;
-
   gi_status?: string;
 };
 
@@ -62,26 +54,16 @@ export type Craft = {
 
 export type CraftProduct = {
   id: number;
-
   name: string;
-
   description?: string;
-
   price: number;
-
   stock: number;
-
   material?: string;
-
   dimensions?: string;
-
   production_time_days?: number;
-
   artisan_id: number;
-
   craft_id: number;
 };
-
 
 // ============================================================
 // CRAFT DETAIL RESPONSE
@@ -89,7 +71,6 @@ export type CraftProduct = {
 
 export type CraftDetails = {
   craft: Craft;
-
   products: CraftProduct[];
 };
 
@@ -103,6 +84,7 @@ export type ProductImage = {
   image_url: string;
   is_primary: boolean;
 };
+
 // ============================================================
 // PRODUCT TYPES
 // ============================================================
@@ -120,31 +102,24 @@ export type Product = {
   production_time_days?: number;
   is_active?: boolean;
 };
+
 // ============================================================
 // AI / RAG TYPES
 // ============================================================
 
 export type AISource = {
   state?: string;
-
   district?: string;
-
   category?: string;
-
   gi_status?: string;
-
   distance?: number;
-
   craft_name?: string;
-
   product?: string;
 };
 
 export type AIResult = {
   success: boolean;
-
   answer: string;
-
   sources?: AISource[];
 };
 
@@ -154,25 +129,17 @@ export type AIResult = {
 
 export type PriceEstimateRequest = {
   product_name: string;
-
   material: string;
-
   product_type: string;
-
   mrp: number;
 };
 
 export type ComparableProduct = {
   product_name: string;
-
   selling_price: number;
-
   material?: string;
-
   product_type?: string;
-
   source?: string;
-
   url?: string;
 };
 
@@ -184,13 +151,11 @@ export type PriceEstimateResult = {
 
     estimated_range?: {
       min: number;
-
       max: number;
     };
 
     price_range?: {
       min: number;
-
       max: number;
     };
 
@@ -205,6 +170,17 @@ export type PriceEstimateResult = {
 };
 
 // ============================================================
+// UPLOAD TYPES
+// ============================================================
+
+export type ProductImageUploadResult = {
+  success: boolean;
+  filename: string;
+  image_url: string;
+  message: string;
+};
+
+// ============================================================
 // API
 // ============================================================
 
@@ -215,13 +191,9 @@ export const api = {
 
   getCrafts: (params?: {
     state?: string;
-
     gi_status?: string;
-
     search?: string;
-
     skip?: number;
-
     limit?: number;
   }) => {
     const searchParams = new URLSearchParams();
@@ -258,17 +230,19 @@ export const api = {
   getCraftDetails: (craftId: number) =>
     apiFetch<CraftDetails>(`/crafts/${craftId}/details`),
 
+  // ==========================================================
+  // SELLER PRODUCTS
+  // ==========================================================
 
-  getMyProducts: () =>
-  apiFetch<Product[]>(
-    "/products/my"
-  ),
+  getMyProducts: () => apiFetch<Product[]>("/products/my"),
+
   // ==========================================================
   // PRODUCT IMAGES
   // ==========================================================
 
   getProductImages: (productId: number) =>
     apiFetch<ProductImage[]>(`/product-image/product/${productId}`),
+
   // ==========================================================
   // PRODUCT MARKETPLACE
   // ==========================================================
@@ -296,24 +270,101 @@ export const api = {
     return apiFetch<Product[]>(`/products/?${searchParams.toString()}`);
   },
 
+  // ==========================================================
+  // SINGLE PRODUCT
+  // ==========================================================
+
   getProduct: (productId: number) =>
     apiFetch<Product>(`/products/${productId}`),
+
+  // ==========================================================
+  // UPLOAD PRODUCT IMAGE
+  // ==========================================================
+
+  uploadProductImage: async (file: File): Promise<ProductImageUploadResult> => {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await fetch(`${API_URL}/upload/product-image`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      let message = `Upload failed: ${response.status}`;
+
+      try {
+        const errorData = await response.json();
+
+        message = errorData.detail || errorData.message || message;
+      } catch {
+        // Response was not JSON.
+      }
+
+      throw new Error(message);
+    }
+
+    return response.json();
+  },
+
+  // ============================================================
+  // AI PRODUCT LISTING
+  // ============================================================
+
+  generateProductListing: async (file: File) => {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await fetch(`${API_URL}/api/ai/generate-listing`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      let message = `AI generation failed: ${response.status}`;
+
+      try {
+        const errorData = await response.json();
+
+        message = errorData.detail || errorData.message || message;
+      } catch {
+        // Response was not JSON
+      }
+
+      throw new Error(message);
+    }
+
+    return response.json() as Promise<{
+      success: boolean;
+
+      data: {
+        product_name: string;
+        description: string;
+        material: string;
+        product_type: string;
+        craft_name: string;
+        region: string;
+        state: string;
+        ocr_text: string;
+        tags: string[];
+        visual_features: string[];
+        confidence: string;
+      };
+    }>;
+  },
 
   // ==========================================================
   // AI / RAG
   // ==========================================================
 
-  askAI: (
-    question: string,
-
-    topK: number = 5,
-  ) =>
+  askAI: (question: string, topK: number = 5) =>
     apiFetch<AIResult>("/api/rag/ask", {
       method: "POST",
 
       body: JSON.stringify({
         question,
-
         top_k: topK,
       }),
     }),
