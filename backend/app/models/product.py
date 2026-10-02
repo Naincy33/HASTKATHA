@@ -5,7 +5,7 @@ from sqlalchemy import (
     Text,
     Float,
     ForeignKey,
-    Boolean
+    Boolean,
 )
 
 from app.database import Base
@@ -14,7 +14,11 @@ from app.database import Base
 class Product(Base):
     __tablename__ = "products"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
     artisan_id = Column(
         Integer,
@@ -28,18 +32,38 @@ class Product(Base):
         nullable=False
     )
 
-    name = Column(String(200), nullable=False)
+    name = Column(
+        String(200),
+        nullable=False
+    )
 
-    description = Column(Text)
+    description = Column(
+        Text
+    )
 
-    price = Column(Float, nullable=False)
+    price = Column(
+        Float,
+        nullable=False
+    )
 
-    stock = Column(Integer, default=1)
+    stock = Column(
+        Integer,
+        default=1
+    )
 
-    material = Column(String(150))
+    material = Column(
+        String(150)
+    )
 
-    dimensions = Column(String(100))
+    dimensions = Column(
+        String(100)
+    )
 
-    production_time_days = Column(Integer)
+    production_time_days = Column(
+        Integer
+    )
 
-    is_active = Column(Boolean, default=True)
+    is_active = Column(
+        Boolean,
+        default=True
+    )

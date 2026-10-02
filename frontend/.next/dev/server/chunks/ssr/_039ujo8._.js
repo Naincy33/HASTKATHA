@@ -583,13 +583,17 @@ const API_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") || "ht
 // ============================================================
 // GENERIC API FETCH
 // ============================================================
-async function apiFetch(endpoint, options) {
+async function apiFetch(endpoint, options = {}) {
+    const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
+    const headers = {
+        "Content-Type": "application/json",
+        ...options.headers || {}
+    };
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...options?.headers || {}
-        }
+        headers
     });
     if (!response.ok) {
         let message = `API error: ${response.status}`;
@@ -597,7 +601,7 @@ async function apiFetch(endpoint, options) {
             const errorData = await response.json();
             message = errorData.detail || errorData.message || message;
         } catch  {
-        // Response was not JSON.
+        // ignore JSON parsing error
         }
         throw new Error(message);
     }
@@ -605,7 +609,29 @@ async function apiFetch(endpoint, options) {
 }
 const api = {
     // ==========================================================
-    // CRAFT EXPLORER
+    // AUTH
+    // ==========================================================
+    login: async (email, password)=>{
+        const response = await apiFetch("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({
+                email,
+                password
+            })
+        });
+        // Save JWT
+        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+        ;
+        return response;
+    },
+    getMe: ()=>apiFetch("/auth/me"),
+    getCurrentUser: ()=>apiFetch("/auth/me"),
+    logout: ()=>{
+        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+        ;
+    },
+    // ==========================================================
+    // CRAFTS
     // ==========================================================
     getCrafts: (params)=>{
         const searchParams = new URLSearchParams();
@@ -622,24 +648,10 @@ const api = {
         searchParams.set("limit", String(params?.limit ?? 50));
         return apiFetch(`/crafts/?${searchParams.toString()}`);
     },
-    // ==========================================================
-    // SINGLE CRAFT
-    // ==========================================================
     getCraft: (craftId)=>apiFetch(`/crafts/${craftId}`),
-    // ==========================================================
-    // CRAFT DETAIL + PRODUCTS
-    // ==========================================================
     getCraftDetails: (craftId)=>apiFetch(`/crafts/${craftId}/details`),
     // ==========================================================
-    // SELLER PRODUCTS
-    // ==========================================================
-    getMyProducts: ()=>apiFetch("/products/my"),
-    // ==========================================================
-    // PRODUCT IMAGES
-    // ==========================================================
-    getProductImages: (productId)=>apiFetch(`/product-image/product/${productId}`),
-    // ==========================================================
-    // PRODUCT MARKETPLACE
+    // PRODUCTS
     // ==========================================================
     getProducts: (params)=>{
         const searchParams = new URLSearchParams();
@@ -653,18 +665,37 @@ const api = {
         searchParams.set("limit", String(params?.limit ?? 50));
         return apiFetch(`/products/?${searchParams.toString()}`);
     },
-    // ==========================================================
-    // SINGLE PRODUCT
-    // ==========================================================
     getProduct: (productId)=>apiFetch(`/products/${productId}`),
+    getMyProducts: ()=>apiFetch("/products/my"),
+    createProduct: (data)=>apiFetch("/products/", {
+            method: "POST",
+            body: JSON.stringify(data)
+        }),
     // ==========================================================
-    // UPLOAD PRODUCT IMAGE
+    // PRODUCT IMAGES
+    // ==========================================================
+    getProductImages: (productId)=>apiFetch(`/product-image/product/${productId}`),
+    createProductImage: (data)=>apiFetch("/product-image/", {
+            method: "POST",
+            body: JSON.stringify({
+                product_id: data.product_id,
+                image_url: data.image_url,
+                is_primary: data.is_primary ?? true
+            })
+        }),
+    // ==========================================================
+    // IMAGE UPLOAD
     // ==========================================================
     uploadProductImage: async (file)=>{
         const formData = new FormData();
         formData.append("file", file);
+        const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
+        const headers = {};
+        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+        ;
         const response = await fetch(`${API_URL}/upload/product-image`, {
             method: "POST",
+            headers,
             body: formData
         });
         if (!response.ok) {
@@ -673,20 +704,25 @@ const api = {
                 const errorData = await response.json();
                 message = errorData.detail || errorData.message || message;
             } catch  {
-            // Response was not JSON.
+            // ignore
             }
             throw new Error(message);
         }
         return response.json();
     },
-    // ============================================================
+    // ==========================================================
     // AI PRODUCT LISTING
-    // ============================================================
+    // ==========================================================
     generateProductListing: async (file)=>{
         const formData = new FormData();
         formData.append("file", file);
+        const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
+        const headers = {};
+        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+        ;
         const response = await fetch(`${API_URL}/api/ai/generate-listing`, {
             method: "POST",
+            headers,
             body: formData
         });
         if (!response.ok) {
@@ -695,14 +731,14 @@ const api = {
                 const errorData = await response.json();
                 message = errorData.detail || errorData.message || message;
             } catch  {
-            // Response was not JSON
+            // ignore
             }
             throw new Error(message);
         }
         return response.json();
     },
     // ==========================================================
-    // AI / RAG
+    // RAG AI ASSISTANT
     // ==========================================================
     askAI: (question, topK = 5)=>apiFetch("/api/rag/ask", {
             method: "POST",
@@ -712,7 +748,7 @@ const api = {
             })
         }),
     // ==========================================================
-    // PRICE ML
+    // PRICE ESTIMATOR
     // ==========================================================
     estimatePrice: (data)=>apiFetch("/api/ml/price-estimate", {
             method: "POST",
