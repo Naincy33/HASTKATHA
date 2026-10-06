@@ -1,3 +1,7 @@
+// ============================================================
+// API CONFIG
+// ============================================================
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://127.0.0.1:8000";
@@ -13,6 +17,7 @@ export type User = {
   email: string;
   role: string;
 };
+
 
 export type LoginResponse = {
   access_token: string;
@@ -37,64 +42,6 @@ export type AIListing = {
   visual_features: string[];
   confidence: "high" | "medium" | "low" | string;
 };
-
-
-// ============================================================
-// GENERIC API FETCH
-// ============================================================
-
-async function apiFetch<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("hastkatha_token")
-      : null;
-
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
-
-  if (token) {
-    (headers as Record<string, string>)["Authorization"] =
-      `Bearer ${token}`;
-  }
-
-  const response = await fetch(
-    `${API_URL}${endpoint}`,
-    {
-      ...options,
-      headers,
-    }
-  );
-
-  if (!response.ok) {
-
-    let message =
-      `API error: ${response.status}`;
-
-    try {
-
-      const errorData =
-        await response.json();
-
-      message =
-        errorData.detail ||
-        errorData.message ||
-        message;
-
-    } catch {
-      // ignore JSON parsing error
-    }
-
-    throw new Error(message);
-  }
-
-  return response.json();
-}
 
 
 // ============================================================
@@ -149,17 +96,13 @@ export type Product = {
   id: number;
   artisan_id: number;
   craft_id: number;
-
   name: string;
   description?: string;
-
   price: number;
   stock: number;
-
   material?: string;
   dimensions?: string;
   production_time_days?: number;
-
   is_active?: boolean;
 };
 
@@ -248,10 +191,111 @@ export type ProductImageUploadResult = {
 
 
 // ============================================================
+// GENERIC API FETCH
+// ============================================================
+
+async function apiFetch<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+
+  // ----------------------------------------------------------
+  // Get JWT token
+  // ----------------------------------------------------------
+
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem(
+          "hastkatha_token"
+        )
+      : null;
+
+
+  // ----------------------------------------------------------
+  // Headers
+  // ----------------------------------------------------------
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+
+    ...(options.headers || {}),
+  };
+
+
+  // ----------------------------------------------------------
+  // Authorization
+  // ----------------------------------------------------------
+
+  if (token) {
+
+    (
+      headers as Record<string, string>
+    ).Authorization =
+      `Bearer ${token}`;
+
+  }
+
+
+  // ----------------------------------------------------------
+  // Request
+  // ----------------------------------------------------------
+
+  const response =
+    await fetch(
+      `${API_URL}${endpoint}`,
+      {
+        ...options,
+        headers,
+      }
+    );
+
+
+  // ----------------------------------------------------------
+  // Error handling
+  // ----------------------------------------------------------
+
+  if (!response.ok) {
+
+    let message =
+      `API error: ${response.status}`;
+
+
+    try {
+
+      const errorData =
+        await response.json();
+
+      message =
+        errorData.detail ||
+        errorData.message ||
+        message;
+
+    } catch {
+
+      // Ignore JSON parsing error
+
+    }
+
+
+    throw new Error(message);
+
+  }
+
+
+  // ----------------------------------------------------------
+  // Response
+  // ----------------------------------------------------------
+
+  return response.json();
+}
+
+
+// ============================================================
 // API
 // ============================================================
 
 export const api = {
+
 
   // ==========================================================
   // AUTH
@@ -275,38 +319,60 @@ export const api = {
         }
       );
 
+
     // Save JWT
+
     if (
       typeof window !== "undefined" &&
       response.access_token
     ) {
+
       localStorage.setItem(
         "hastkatha_token",
         response.access_token
       );
+
     }
+
 
     return response;
   },
 
 
-  getMe: () =>
-    apiFetch<User>("/auth/me"),
+  // ----------------------------------------------------------
+  // Current user
+  // ----------------------------------------------------------
 
+  getMe: () =>
+    apiFetch<User>(
+      "/auth/me"
+    ),
+
+
+  // Keep this for older pages if needed
 
   getCurrentUser: () =>
-    apiFetch<User>("/auth/me"),
+    apiFetch<User>(
+      "/auth/me"
+    ),
 
+
+  // ----------------------------------------------------------
+  // Logout
+  // ----------------------------------------------------------
 
   logout: () => {
 
     if (
       typeof window !== "undefined"
     ) {
+
       localStorage.removeItem(
         "hastkatha_token"
       );
+
     }
+
   },
 
 
@@ -325,50 +391,71 @@ export const api = {
     const searchParams =
       new URLSearchParams();
 
+
     if (params?.state) {
+
       searchParams.set(
         "state",
         params.state
       );
+
     }
 
+
     if (params?.gi_status) {
+
       searchParams.set(
         "gi_status",
         params.gi_status
       );
+
     }
 
+
     if (params?.search) {
+
       searchParams.set(
         "search",
         params.search
       );
+
     }
+
 
     searchParams.set(
       "skip",
-      String(params?.skip ?? 0)
+      String(
+        params?.skip ?? 0
+      )
     );
+
 
     searchParams.set(
       "limit",
-      String(params?.limit ?? 50)
+      String(
+        params?.limit ?? 50
+      )
     );
+
 
     return apiFetch<Craft[]>(
       `/crafts/?${searchParams.toString()}`
     );
+
   },
 
 
-  getCraft: (craftId: number) =>
+  getCraft: (
+    craftId: number
+  ) =>
     apiFetch<Craft>(
       `/crafts/${craftId}`
     ),
 
 
-  getCraftDetails: (craftId: number) =>
+  getCraftDetails: (
+    craftId: number
+  ) =>
     apiFetch<CraftDetails>(
       `/crafts/${craftId}/details`
     ),
@@ -388,41 +475,65 @@ export const api = {
     const searchParams =
       new URLSearchParams();
 
+
     if (params?.search) {
+
       searchParams.set(
         "search",
         params.search
       );
+
     }
 
+
     if (params?.craft_id) {
+
       searchParams.set(
         "craft_id",
         String(params.craft_id)
       );
+
     }
+
 
     searchParams.set(
       "skip",
-      String(params?.skip ?? 0)
+      String(
+        params?.skip ?? 0
+      )
     );
+
 
     searchParams.set(
       "limit",
-      String(params?.limit ?? 50)
+      String(
+        params?.limit ?? 50
+      )
     );
+
 
     return apiFetch<Product[]>(
       `/products/?${searchParams.toString()}`
     );
+
   },
 
 
-  getProduct: (productId: number) =>
+  // ----------------------------------------------------------
+  // Single product
+  // ----------------------------------------------------------
+
+  getProduct: (
+    productId: number
+  ) =>
     apiFetch<Product>(
       `/products/${productId}`
     ),
 
+
+  // ----------------------------------------------------------
+  // Seller's products
+  // ----------------------------------------------------------
 
   getMyProducts: () =>
     apiFetch<Product[]>(
@@ -430,23 +541,28 @@ export const api = {
     ),
 
 
-  createProduct: (
-    data: {
-      craft_id: number;
-      name: string;
-      description?: string;
-      price: number;
-      stock: number;
-      material?: string;
-      dimensions?: string;
-      production_time_days?: number;
-    }
-  ) =>
+  // ----------------------------------------------------------
+  // CREATE PRODUCT
+  // ----------------------------------------------------------
+
+  createProduct: (data: {
+    craft_id: number;
+    name: string;
+    description?: string;
+    price: number;
+    stock: number;
+    material?: string;
+    dimensions?: string;
+    production_time_days?: number;
+  }) =>
     apiFetch<Product>(
       "/products/",
       {
         method: "POST",
-        body: JSON.stringify(data),
+
+        body: JSON.stringify(
+          data
+        ),
       }
     ),
 
@@ -463,6 +579,10 @@ export const api = {
     ),
 
 
+  // ----------------------------------------------------------
+  // Attach image to product
+  // ----------------------------------------------------------
+
   createProductImage: (data: {
     product_id: number;
     image_url: string;
@@ -474,8 +594,12 @@ export const api = {
         method: "POST",
 
         body: JSON.stringify({
-          product_id: data.product_id,
-          image_url: data.image_url,
+          product_id:
+            data.product_id,
+
+          image_url:
+            data.image_url,
+
           is_primary:
             data.is_primary ?? true,
         }),
@@ -494,10 +618,14 @@ export const api = {
     const formData =
       new FormData();
 
+
     formData.append(
       "file",
       file
     );
+
+
+    // Get JWT
 
     const token =
       typeof window !== "undefined"
@@ -506,29 +634,38 @@ export const api = {
           )
         : null;
 
+
     const headers: HeadersInit = {};
 
+
     if (token) {
+
       (
         headers as Record<string, string>
-      )["Authorization"] =
+      ).Authorization =
         `Bearer ${token}`;
+
     }
+
 
     const response =
       await fetch(
         `${API_URL}/upload/product-image`,
         {
           method: "POST",
+
           headers,
+
           body: formData,
         }
       );
+
 
     if (!response.ok) {
 
       let message =
         `Upload failed: ${response.status}`;
+
 
       try {
 
@@ -541,13 +678,19 @@ export const api = {
           message;
 
       } catch {
-        // ignore
+
+        // Ignore
+
       }
 
+
       throw new Error(message);
+
     }
 
+
     return response.json();
+
   },
 
 
@@ -565,10 +708,14 @@ export const api = {
     const formData =
       new FormData();
 
+
     formData.append(
       "file",
       file
     );
+
+
+    // Get JWT
 
     const token =
       typeof window !== "undefined"
@@ -577,29 +724,38 @@ export const api = {
           )
         : null;
 
+
     const headers: HeadersInit = {};
 
+
     if (token) {
+
       (
         headers as Record<string, string>
-      )["Authorization"] =
+      ).Authorization =
         `Bearer ${token}`;
+
     }
+
 
     const response =
       await fetch(
         `${API_URL}/api/ai/generate-listing`,
         {
           method: "POST",
+
           headers,
+
           body: formData,
         }
       );
+
 
     if (!response.ok) {
 
       let message =
         `AI generation failed: ${response.status}`;
+
 
       try {
 
@@ -612,13 +768,19 @@ export const api = {
           message;
 
       } catch {
-        // ignore
+
+        // Ignore
+
       }
 
+
       throw new Error(message);
+
     }
 
+
     return response.json();
+
   },
 
 
@@ -655,9 +817,12 @@ export const api = {
       {
         method: "POST",
 
-        body: JSON.stringify(data),
+        body: JSON.stringify(
+          data
+        ),
       }
     ),
+
 };
 
 

@@ -589,33 +589,54 @@ __turbopack_context__.s([
     ()=>api
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
+// ============================================================
+// API CONFIG
+// ============================================================
 const API_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") || "http://127.0.0.1:8000";
 // ============================================================
 // GENERIC API FETCH
 // ============================================================
 async function apiFetch(endpoint, options = {}) {
+    // ----------------------------------------------------------
+    // Get JWT token
+    // ----------------------------------------------------------
     const token = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem("hastkatha_token") : "TURBOPACK unreachable";
+    // ----------------------------------------------------------
+    // Headers
+    // ----------------------------------------------------------
     const headers = {
         "Content-Type": "application/json",
         ...options.headers || {}
     };
+    // ----------------------------------------------------------
+    // Authorization
+    // ----------------------------------------------------------
     if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+        headers.Authorization = `Bearer ${token}`;
     }
+    // ----------------------------------------------------------
+    // Request
+    // ----------------------------------------------------------
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers
     });
+    // ----------------------------------------------------------
+    // Error handling
+    // ----------------------------------------------------------
     if (!response.ok) {
         let message = `API error: ${response.status}`;
         try {
             const errorData = await response.json();
             message = errorData.detail || errorData.message || message;
         } catch  {
-        // ignore JSON parsing error
+        // Ignore JSON parsing error
         }
         throw new Error(message);
     }
+    // ----------------------------------------------------------
+    // Response
+    // ----------------------------------------------------------
     return response.json();
 }
 const api = {
@@ -636,8 +657,15 @@ const api = {
         }
         return response;
     },
+    // ----------------------------------------------------------
+    // Current user
+    // ----------------------------------------------------------
     getMe: ()=>apiFetch("/auth/me"),
+    // Keep this for older pages if needed
     getCurrentUser: ()=>apiFetch("/auth/me"),
+    // ----------------------------------------------------------
+    // Logout
+    // ----------------------------------------------------------
     logout: ()=>{
         if ("TURBOPACK compile-time truthy", 1) {
             localStorage.removeItem("hastkatha_token");
@@ -678,8 +706,17 @@ const api = {
         searchParams.set("limit", String(params?.limit ?? 50));
         return apiFetch(`/products/?${searchParams.toString()}`);
     },
+    // ----------------------------------------------------------
+    // Single product
+    // ----------------------------------------------------------
     getProduct: (productId)=>apiFetch(`/products/${productId}`),
+    // ----------------------------------------------------------
+    // Seller's products
+    // ----------------------------------------------------------
     getMyProducts: ()=>apiFetch("/products/my"),
+    // ----------------------------------------------------------
+    // CREATE PRODUCT
+    // ----------------------------------------------------------
     createProduct: (data)=>apiFetch("/products/", {
             method: "POST",
             body: JSON.stringify(data)
@@ -688,6 +725,9 @@ const api = {
     // PRODUCT IMAGES
     // ==========================================================
     getProductImages: (productId)=>apiFetch(`/product-image/product/${productId}`),
+    // ----------------------------------------------------------
+    // Attach image to product
+    // ----------------------------------------------------------
     createProductImage: (data)=>apiFetch("/product-image/", {
             method: "POST",
             body: JSON.stringify({
@@ -702,10 +742,11 @@ const api = {
     uploadProductImage: async (file)=>{
         const formData = new FormData();
         formData.append("file", file);
+        // Get JWT
         const token = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem("hastkatha_token") : "TURBOPACK unreachable";
         const headers = {};
         if (token) {
-            headers["Authorization"] = `Bearer ${token}`;
+            headers.Authorization = `Bearer ${token}`;
         }
         const response = await fetch(`${API_URL}/upload/product-image`, {
             method: "POST",
@@ -718,7 +759,7 @@ const api = {
                 const errorData = await response.json();
                 message = errorData.detail || errorData.message || message;
             } catch  {
-            // ignore
+            // Ignore
             }
             throw new Error(message);
         }
@@ -730,10 +771,11 @@ const api = {
     generateProductListing: async (file)=>{
         const formData = new FormData();
         formData.append("file", file);
+        // Get JWT
         const token = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem("hastkatha_token") : "TURBOPACK unreachable";
         const headers = {};
         if (token) {
-            headers["Authorization"] = `Bearer ${token}`;
+            headers.Authorization = `Bearer ${token}`;
         }
         const response = await fetch(`${API_URL}/api/ai/generate-listing`, {
             method: "POST",
@@ -746,7 +788,7 @@ const api = {
                 const errorData = await response.json();
                 message = errorData.detail || errorData.message || message;
             } catch  {
-            // ignore
+            // Ignore
             }
             throw new Error(message);
         }

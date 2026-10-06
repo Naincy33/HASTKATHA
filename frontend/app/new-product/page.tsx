@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import {
   ArrowLeft,
@@ -14,8 +15,6 @@ import {
   MapPin,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
-
 import {
   api,
   type Craft,
@@ -25,129 +24,93 @@ import {
 
 export default function NewProductPage() {
 
-  /* =========================
-     IMAGE STATE
-  ========================= */
+  // ============================================================
+  // IMAGE STATE
+  // ============================================================
 
-  const [
-    selectedImage,
-    setSelectedImage,
-  ] = useState<File | null>(null);
+  const [selectedImage, setSelectedImage] =
+    useState<File | null>(null);
 
-  const [
-    previewUrl,
-    setPreviewUrl,
-  ] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] =
+    useState<string | null>(null);
 
-  const [
-    uploadedImageUrl,
-    setUploadedImageUrl,
-  ] = useState<string | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] =
+    useState<string | null>(null);
 
 
-  /* =========================
-     AI STATE
-  ========================= */
+  // ============================================================
+  // AI STATE
+  // ============================================================
 
-  const [
-    aiListing,
-    setAiListing,
-  ] = useState<AIListing | null>(null);
+  const [aiListing, setAiListing] =
+    useState<AIListing | null>(null);
 
-  const [
-    generating,
-    setGenerating,
-  ] = useState(false);
+  const [generating, setGenerating] =
+    useState(false);
 
 
-  /* =========================
-     PUBLISH STATE
-  ========================= */
+  // ============================================================
+  // PUBLISH STATE
+  // ============================================================
 
-  const [
-    publishing,
-    setPublishing,
-  ] = useState(false);
+  const [publishing, setPublishing] =
+    useState(false);
 
 
-  /* =========================
-     CRAFTS
-  ========================= */
+  // ============================================================
+  // CRAFT STATE
+  // ============================================================
 
-  const [
-    crafts,
-    setCrafts,
-  ] = useState<Craft[]>([]);
+  const [crafts, setCrafts] =
+    useState<Craft[]>([]);
 
-  const [
-    selectedCraftId,
-    setSelectedCraftId,
-  ] = useState("");
+  const [selectedCraftId, setSelectedCraftId] =
+    useState("");
 
 
-  /* =========================
-     FORM
-  ========================= */
+  // ============================================================
+  // FORM STATE
+  // ============================================================
 
-  const [
-    productName,
-    setProductName,
-  ] = useState("");
+  const [productName, setProductName] =
+    useState("");
 
-  const [
-    description,
-    setDescription,
-  ] = useState("");
+  const [description, setDescription] =
+    useState("");
 
-  const [
-    material,
-    setMaterial,
-  ] = useState("");
+  const [material, setMaterial] =
+    useState("");
 
-  const [
-    productType,
-    setProductType,
-  ] = useState("");
+  const [productType, setProductType] =
+    useState("");
 
-  const [
-    state,
-    setState,
-  ] = useState("");
+  const [state, setState] =
+    useState("");
 
-  const [
-    region,
-    setRegion,
-  ] = useState("");
+  const [region, setRegion] =
+    useState("");
 
-  const [
-    price,
-    setPrice,
-  ] = useState("");
+  const [price, setPrice] =
+    useState("");
 
-  const [
-    stock,
-    setStock,
-  ] = useState("1");
+  const [stock, setStock] =
+    useState("1");
 
 
-  /* =========================
-     UI
-  ========================= */
+  // ============================================================
+  // UI STATE
+  // ============================================================
 
-  const [
-    error,
-    setError,
-  ] = useState<string | null>(null);
+  const [error, setError] =
+    useState<string | null>(null);
 
-  const [
-    success,
-    setSuccess,
-  ] = useState<string | null>(null);
+  const [success, setSuccess] =
+    useState<string | null>(null);
 
 
-  /* =========================
-     LOAD CRAFTS
-  ========================= */
+  // ============================================================
+  // LOAD CRAFTS
+  // ============================================================
 
   useEffect(() => {
 
@@ -155,8 +118,7 @@ export default function NewProductPage() {
 
       try {
 
-        const data =
-          await api.getCrafts();
+        const data = await api.getCrafts();
 
         setCrafts(data);
 
@@ -176,13 +138,12 @@ export default function NewProductPage() {
   }, []);
 
 
-  /* =========================
-     IMAGE SELECT
-  ========================= */
+  // ============================================================
+  // IMAGE SELECT
+  // ============================================================
 
   function handleImageChange(
-    event:
-      React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) {
 
     const file =
@@ -193,11 +154,9 @@ export default function NewProductPage() {
     }
 
 
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
+    // Check image type
+
+    if (!file.type.startsWith("image/")) {
 
       setError(
         "Please select an image file."
@@ -207,10 +166,9 @@ export default function NewProductPage() {
     }
 
 
-    if (
-      file.size >
-      10 * 1024 * 1024
-    ) {
+    // Check image size
+
+    if (file.size > 10 * 1024 * 1024) {
 
       setError(
         "Image must be smaller than 10 MB."
@@ -220,10 +178,14 @@ export default function NewProductPage() {
     }
 
 
+    // Remove old preview
+
     if (previewUrl) {
+
       URL.revokeObjectURL(
         previewUrl
       );
+
     }
 
 
@@ -237,16 +199,17 @@ export default function NewProductPage() {
 
     setAiListing(null);
 
+    setSelectedCraftId("");
+
     setError(null);
 
     setSuccess(null);
-
   }
 
 
-  /* =========================
-     REMOVE IMAGE
-  ========================= */
+  // ============================================================
+  // REMOVE IMAGE
+  // ============================================================
 
   function removeImage() {
 
@@ -266,12 +229,17 @@ export default function NewProductPage() {
 
     setAiListing(null);
 
+    setSelectedCraftId("");
+
+    setError(null);
+
+    setSuccess(null);
   }
 
 
-  /* =========================
-     GENERATE AI LISTING
-  ========================= */
+  // ============================================================
+  // GENERATE AI LISTING
+  // ============================================================
 
   async function handleGenerateListing() {
 
@@ -294,43 +262,39 @@ export default function NewProductPage() {
       setSuccess(null);
 
 
-      /*
-       * First upload image
-       */
+      // --------------------------------------------------------
+      // Upload image
+      // --------------------------------------------------------
 
       const uploadResult =
         await api.uploadProductImage(
           selectedImage
         );
 
-
       setUploadedImageUrl(
         uploadResult.image_url
       );
 
 
-      /*
-       * Then AI analysis
-       */
+      // --------------------------------------------------------
+      // Generate AI listing
+      // --------------------------------------------------------
 
       const result =
         await api.generateProductListing(
           selectedImage
         );
 
-
       const listing =
         result.data;
 
 
-      setAiListing(
-        listing
-      );
+      setAiListing(listing);
 
 
-      /*
-       * Fill editable fields
-       */
+      // --------------------------------------------------------
+      // Fill form fields
+      // --------------------------------------------------------
 
       setProductName(
         listing.product_name || ""
@@ -357,10 +321,9 @@ export default function NewProductPage() {
       );
 
 
-      /*
-       * Try to automatically
-       * match AI craft name
-       */
+      // --------------------------------------------------------
+      // Try matching AI craft with database craft
+      // --------------------------------------------------------
 
       if (
         listing.craft_name &&
@@ -374,24 +337,25 @@ export default function NewProductPage() {
 
 
         const matchedCraft =
-          crafts.find(
-            (craft) =>
+          crafts.find((craft) => {
+
+            const craftName =
               craft.name
                 .toLowerCase()
-                .includes(aiCraft) ||
-              aiCraft.includes(
-                craft.name
-                  .toLowerCase()
-              )
-          );
+                .trim();
+
+            return (
+              craftName.includes(aiCraft) ||
+              aiCraft.includes(craftName)
+            );
+
+          });
 
 
         if (matchedCraft) {
 
           setSelectedCraftId(
-            String(
-              matchedCraft.id
-            )
+            String(matchedCraft.id)
           );
 
         }
@@ -410,7 +374,6 @@ export default function NewProductPage() {
         err
       );
 
-
       setError(
         err instanceof Error
           ? err.message
@@ -426,9 +389,9 @@ export default function NewProductPage() {
   }
 
 
-  /* =========================
-     PUBLISH PRODUCT
-  ========================= */
+  // ============================================================
+  // PUBLISH PRODUCT
+  // ============================================================
 
   async function handlePublish() {
 
@@ -436,6 +399,10 @@ export default function NewProductPage() {
 
     setSuccess(null);
 
+
+    // --------------------------------------------------------
+    // Basic validation
+    // --------------------------------------------------------
 
     if (!selectedImage) {
 
@@ -490,6 +457,7 @@ export default function NewProductPage() {
     const numericPrice =
       Number(price);
 
+
     if (
       !price ||
       Number.isNaN(numericPrice) ||
@@ -507,6 +475,7 @@ export default function NewProductPage() {
     const numericStock =
       Number(stock);
 
+
     if (
       Number.isNaN(numericStock) ||
       numericStock < 0
@@ -520,22 +489,25 @@ export default function NewProductPage() {
     }
 
 
+    // --------------------------------------------------------
+    // Start publishing
+    // --------------------------------------------------------
+
     try {
 
       setPublishing(true);
 
 
-      /*
-       * Create product
-       */
+      // ------------------------------------------------------
+      // STEP 1
+      // Create product in database
+      // ------------------------------------------------------
 
       const product =
         await api.createProduct({
 
           craft_id:
-            Number(
-              selectedCraftId
-            ),
+            Number(selectedCraftId),
 
           name:
             productName.trim(),
@@ -550,15 +522,15 @@ export default function NewProductPage() {
             numericStock,
 
           material:
-            material.trim() ||
-            undefined,
+            material.trim() || undefined,
 
         });
 
 
-      /*
-       * Attach image
-       */
+      // ------------------------------------------------------
+      // STEP 2
+      // Attach product image
+      // ------------------------------------------------------
 
       await api.createProductImage({
 
@@ -574,14 +546,18 @@ export default function NewProductPage() {
       });
 
 
+      // ------------------------------------------------------
+      // SUCCESS
+      // ------------------------------------------------------
+
       setSuccess(
         "🎉 Product published successfully!"
       );
 
 
-      /*
-       * Redirect to seller dashboard
-       */
+      // ------------------------------------------------------
+      // Go to seller dashboard
+      // ------------------------------------------------------
 
       setTimeout(() => {
 
@@ -598,7 +574,6 @@ export default function NewProductPage() {
         err
       );
 
-
       setError(
         err instanceof Error
           ? err.message
@@ -614,24 +589,26 @@ export default function NewProductPage() {
   }
 
 
+  // ============================================================
+  // UI
+  // ============================================================
+
   return (
 
     <main className="min-h-screen bg-[#f6f1e7] text-[#202720]">
 
-      {/* =========================
-          HEADER
-      ========================= */}
-
       <div className="mx-auto max-w-6xl px-6 py-8">
+
+        {/* ================================================== */}
+        {/* HEADER */}
+        {/* ================================================== */}
 
         <Link
           href="/seller"
           className="inline-flex items-center gap-2 text-sm font-semibold text-[#5e665f] hover:text-[#202720]"
         >
 
-          <ArrowLeft
-            size={18}
-          />
+          <ArrowLeft size={18} />
 
           Back to seller dashboard
 
@@ -656,18 +633,17 @@ export default function NewProductPage() {
 
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[#697069]">
 
-            Upload a photo of your craft and let
-            HASTKATHA help turn it into a
-            marketplace-ready product listing.
+            Upload a photo of your craft and let HASTKATHA
+            help turn it into a marketplace-ready product listing.
 
           </p>
 
         </div>
 
 
-        {/* =========================
-            ERROR / SUCCESS
-        ========================= */}
+        {/* ================================================== */}
+        {/* ERROR */}
+        {/* ================================================== */}
 
         {error && (
 
@@ -680,6 +656,10 @@ export default function NewProductPage() {
         )}
 
 
+        {/* ================================================== */}
+        {/* SUCCESS */}
+        {/* ================================================== */}
+
         {success && (
 
           <div className="mt-8 rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-medium text-green-700">
@@ -691,11 +671,16 @@ export default function NewProductPage() {
         )}
 
 
+        {/* ================================================== */}
+        {/* MAIN GRID */}
+        {/* ================================================== */}
+
         <div className="mt-10 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
 
-          {/* =========================
-              LEFT — IMAGE
-          ========================= */}
+
+          {/* ================================================= */}
+          {/* LEFT - IMAGE */}
+          {/* ================================================= */}
 
           <section className="rounded-[28px] border border-[#ddd7ca] bg-[#fbf8f1] p-6">
 
@@ -722,9 +707,7 @@ export default function NewProductPage() {
 
                 <div className="flex items-center gap-1 rounded-full bg-[#e5efe1] px-3 py-1.5 text-xs font-bold text-[#365337]">
 
-                  <Check
-                    size={14}
-                  />
+                  <Check size={14} />
 
                   Uploaded
 
@@ -735,15 +718,15 @@ export default function NewProductPage() {
             </div>
 
 
+            {/* IMAGE UPLOAD */}
+
             {!previewUrl ? (
 
               <label className="mt-8 flex min-h-[420px] cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-[#d4cec1] bg-[#f5f1e8] text-center transition hover:border-[#c55235]">
 
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e5eee1]">
 
-                  <ImagePlus
-                    size={28}
-                  />
+                  <ImagePlus size={28} />
 
                 </div>
 
@@ -757,8 +740,7 @@ export default function NewProductPage() {
 
                 <p className="mt-2 max-w-xs text-sm leading-6 text-[#777d76]">
 
-                  Take a clear photo of your
-                  handmade product.
+                  Take a clear photo of your handmade product.
 
                 </p>
 
@@ -774,9 +756,7 @@ export default function NewProductPage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={
-                    handleImageChange
-                  }
+                  onChange={handleImageChange}
                 />
 
               </label>
@@ -796,26 +776,22 @@ export default function NewProductPage() {
 
                   <button
                     type="button"
-                    onClick={
-                      removeImage
-                    }
+                    onClick={removeImage}
                     className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#202720] shadow"
                   >
 
-                    <X
-                      size={18}
-                    />
+                    <X size={18} />
 
                   </button>
 
                 </div>
 
 
+                {/* AI BUTTON */}
+
                 <button
                   type="button"
-                  onClick={
-                    handleGenerateListing
-                  }
+                  onClick={handleGenerateListing}
                   disabled={generating}
                   className="mt-5 flex w-full items-center justify-center gap-3 rounded-full bg-[#202720] px-6 py-4 font-bold text-white transition hover:bg-[#303a32] disabled:cursor-not-allowed disabled:opacity-60"
                 >
@@ -829,18 +805,14 @@ export default function NewProductPage() {
                       />
 
                       HASTKATHA is analysing...
-
                     </>
 
                   ) : (
 
                     <>
-                      <Sparkles
-                        size={19}
-                      />
+                      <Sparkles size={19} />
 
                       Generate listing with AI
-
                     </>
 
                   )}
@@ -854,37 +826,36 @@ export default function NewProductPage() {
           </section>
 
 
-          {/* =========================
-              RIGHT — FORM
-          ========================= */}
+          {/* ================================================= */}
+          {/* RIGHT - FORM */}
+          {/* ================================================= */}
 
           <section className="rounded-[28px] border border-[#ddd7ca] bg-[#fbf8f1] p-6">
 
-            <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c55235]">
 
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c55235]">
+              Step 02
 
-                Step 02
-
-              </p>
-
-              <h2 className="mt-2 font-serif text-3xl font-bold">
-
-                Review your listing
-
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-[#777d76]">
-
-                AI suggestions are editable.
-                Review everything before publishing.
-
-              </p>
-
-            </div>
+            </p>
 
 
-            {/* AI confidence */}
+            <h2 className="mt-2 font-serif text-3xl font-bold">
+
+              Review your listing.
+
+            </h2>
+
+
+            <p className="mt-2 text-sm leading-6 text-[#777d76]">
+
+              AI suggestions are editable. Review everything before publishing.
+
+            </p>
+
+
+            {/* ================================================= */}
+            {/* AI CONFIDENCE */}
+            {/* ================================================= */}
 
             {aiListing && (
 
@@ -894,11 +865,10 @@ export default function NewProductPage() {
 
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white">
 
-                    <Sparkles
-                      size={17}
-                    />
+                    <Sparkles size={17} />
 
                   </div>
+
 
                   <div>
 
@@ -925,7 +895,10 @@ export default function NewProductPage() {
 
             <div className="mt-7 space-y-5">
 
+
+              {/* ================================================= */}
               {/* PRODUCT NAME */}
+              {/* ================================================= */}
 
               <div>
 
@@ -935,12 +908,11 @@ export default function NewProductPage() {
 
                 </label>
 
+
                 <input
                   value={productName}
                   onChange={(e) =>
-                    setProductName(
-                      e.target.value
-                    )
+                    setProductName(e.target.value)
                   }
                   placeholder="e.g. Handwoven Silk Dupatta"
                   className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none transition focus:border-[#202720]"
@@ -949,7 +921,9 @@ export default function NewProductPage() {
               </div>
 
 
+              {/* ================================================= */}
               {/* DESCRIPTION */}
+              {/* ================================================= */}
 
               <div>
 
@@ -959,12 +933,11 @@ export default function NewProductPage() {
 
                 </label>
 
+
                 <textarea
                   value={description}
                   onChange={(e) =>
-                    setDescription(
-                      e.target.value
-                    )
+                    setDescription(e.target.value)
                   }
                   rows={5}
                   placeholder="Describe your product..."
@@ -974,7 +947,9 @@ export default function NewProductPage() {
               </div>
 
 
+              {/* ================================================= */}
               {/* MATERIAL + TYPE */}
+              {/* ================================================= */}
 
               <div className="grid gap-5 sm:grid-cols-2">
 
@@ -986,12 +961,11 @@ export default function NewProductPage() {
 
                   </label>
 
+
                   <input
                     value={material}
                     onChange={(e) =>
-                      setMaterial(
-                        e.target.value
-                      )
+                      setMaterial(e.target.value)
                     }
                     placeholder="e.g. Silk"
                     className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none focus:border-[#202720]"
@@ -1008,12 +982,11 @@ export default function NewProductPage() {
 
                   </label>
 
+
                   <input
                     value={productType}
                     onChange={(e) =>
-                      setProductType(
-                        e.target.value
-                      )
+                      setProductType(e.target.value)
                     }
                     placeholder="e.g. Dupatta"
                     className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none focus:border-[#202720]"
@@ -1024,26 +997,25 @@ export default function NewProductPage() {
               </div>
 
 
+              {/* ================================================= */}
               {/* CRAFT */}
+              {/* ================================================= */}
 
               <div>
 
                 <label className="mb-2 flex items-center gap-2 text-sm font-bold">
 
-                  <Tag
-                    size={15}
-                  />
+                  <Tag size={15} />
 
                   Craft
 
                 </label>
 
+
                 <select
                   value={selectedCraftId}
                   onChange={(e) =>
-                    setSelectedCraftId(
-                      e.target.value
-                    )
+                    setSelectedCraftId(e.target.value)
                   }
                   className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none focus:border-[#202720]"
                 >
@@ -1052,36 +1024,31 @@ export default function NewProductPage() {
                     Select the craft
                   </option>
 
-                  {crafts.map(
-                    (craft) => (
 
-                      <option
-                        key={
-                          craft.id
-                        }
-                        value={
-                          craft.id
-                        }
-                      >
+                  {crafts.map((craft) => (
 
-                        {craft.name}
+                    <option
+                      key={craft.id}
+                      value={craft.id}
+                    >
 
-                      </option>
+                      {craft.name}
 
-                    )
-                  )}
+                    </option>
+
+                  ))}
 
                 </select>
+
 
                 {aiListing?.craft_name && (
 
                   <p className="mt-2 text-xs text-[#777d76]">
 
                     AI suggestion:{" "}
+
                     <strong>
-                      {
-                        aiListing.craft_name
-                      }
+                      {aiListing.craft_name}
                     </strong>
 
                   </p>
@@ -1091,7 +1058,9 @@ export default function NewProductPage() {
               </div>
 
 
+              {/* ================================================= */}
               {/* LOCATION */}
+              {/* ================================================= */}
 
               <div className="grid gap-5 sm:grid-cols-2">
 
@@ -1099,20 +1068,17 @@ export default function NewProductPage() {
 
                   <label className="mb-2 flex items-center gap-2 text-sm font-bold">
 
-                    <MapPin
-                      size={15}
-                    />
+                    <MapPin size={15} />
 
                     State
 
                   </label>
 
+
                   <input
                     value={state}
                     onChange={(e) =>
-                      setState(
-                        e.target.value
-                      )
+                      setState(e.target.value)
                     }
                     placeholder="Optional"
                     className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none focus:border-[#202720]"
@@ -1129,12 +1095,11 @@ export default function NewProductPage() {
 
                   </label>
 
+
                   <input
                     value={region}
                     onChange={(e) =>
-                      setRegion(
-                        e.target.value
-                      )
+                      setRegion(e.target.value)
                     }
                     placeholder="Optional"
                     className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none focus:border-[#202720]"
@@ -1145,7 +1110,9 @@ export default function NewProductPage() {
               </div>
 
 
+              {/* ================================================= */}
               {/* PRICE + STOCK */}
+              {/* ================================================= */}
 
               <div className="grid gap-5 sm:grid-cols-2">
 
@@ -1157,18 +1124,18 @@ export default function NewProductPage() {
 
                   </label>
 
+
                   <input
                     type="number"
                     min="1"
                     value={price}
                     onChange={(e) =>
-                      setPrice(
-                        e.target.value
-                      )
+                      setPrice(e.target.value)
                     }
                     placeholder="Enter your price"
                     className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none focus:border-[#202720]"
                   />
+
 
                   <p className="mt-2 text-xs text-[#777d76]">
 
@@ -1183,22 +1150,19 @@ export default function NewProductPage() {
 
                   <label className="mb-2 flex items-center gap-2 text-sm font-bold">
 
-                    <Package
-                      size={15}
-                    />
+                    <Package size={15} />
 
                     Stock
 
                   </label>
+
 
                   <input
                     type="number"
                     min="0"
                     value={stock}
                     onChange={(e) =>
-                      setStock(
-                        e.target.value
-                      )
+                      setStock(e.target.value)
                     }
                     className="w-full rounded-2xl border border-[#d5d0c5] bg-white px-4 py-3.5 outline-none focus:border-[#202720]"
                   />
@@ -1208,11 +1172,13 @@ export default function NewProductPage() {
               </div>
 
 
+              {/* ================================================= */}
               {/* TAGS */}
+              {/* ================================================= */}
 
               {aiListing &&
-                aiListing.tags?.length >
-                  0 && (
+                aiListing.tags &&
+                aiListing.tags.length > 0 && (
 
                   <div>
 
@@ -1222,18 +1188,14 @@ export default function NewProductPage() {
 
                     </label>
 
+
                     <div className="flex flex-wrap gap-2">
 
                       {aiListing.tags.map(
-                        (
-                          tag,
-                          index
-                        ) => (
+                        (tag, index) => (
 
                           <span
-                            key={
-                              index
-                            }
+                            key={index}
                             className="rounded-full bg-[#ece7dc] px-3 py-1.5 text-xs font-semibold text-[#596059]"
                           >
 
@@ -1251,13 +1213,13 @@ export default function NewProductPage() {
                 )}
 
 
+              {/* ================================================= */}
               {/* VISUAL FEATURES */}
+              {/* ================================================= */}
 
               {aiListing &&
-                aiListing
-                  .visual_features
-                  ?.length >
-                  0 && (
+                aiListing.visual_features &&
+                aiListing.visual_features.length > 0 && (
 
                   <div>
 
@@ -1267,18 +1229,14 @@ export default function NewProductPage() {
 
                     </label>
 
+
                     <ul className="space-y-2">
 
                       {aiListing.visual_features.map(
-                        (
-                          feature,
-                          index
-                        ) => (
+                        (feature, index) => (
 
                           <li
-                            key={
-                              index
-                            }
+                            key={index}
                             className="flex gap-2 text-sm text-[#687068]"
                           >
 
@@ -1301,13 +1259,13 @@ export default function NewProductPage() {
                 )}
 
 
+              {/* ================================================= */}
               {/* PUBLISH */}
+              {/* ================================================= */}
 
               <button
                 type="button"
-                onClick={
-                  handlePublish
-                }
+                onClick={handlePublish}
                 disabled={
                   publishing ||
                   generating ||
@@ -1325,18 +1283,14 @@ export default function NewProductPage() {
                     />
 
                     Publishing...
-
                   </>
 
                 ) : (
 
                   <>
-                    <Check
-                      size={19}
-                    />
+                    <Check size={19} />
 
                     Publish product
-
                   </>
 
                 )}
@@ -1348,8 +1302,7 @@ export default function NewProductPage() {
 
                 <p className="text-center text-xs text-[#858a84]">
 
-                  Upload an image and generate
-                  the AI listing before publishing.
+                  Upload an image and generate the AI listing before publishing.
 
                 </p>
 
@@ -1366,4 +1319,5 @@ export default function NewProductPage() {
     </main>
 
   );
+
 }

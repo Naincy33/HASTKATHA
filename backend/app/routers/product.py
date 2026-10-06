@@ -35,7 +35,7 @@ def create_product(
     current_user: User = Depends(get_current_user)
 ):
     # --------------------------------------------------------
-    # Check whether current user is an artisan
+    # Check artisan profile
     # --------------------------------------------------------
 
     artisan = (
@@ -95,6 +95,54 @@ def create_product(
 
 
 # ============================================================
+# GET CURRENT ARTISAN'S PRODUCTS
+# IMPORTANT:
+# This route MUST come before /{product_id}
+# ============================================================
+
+@router.get(
+    "/my",
+    response_model=list[ProductResponse]
+)
+def get_my_products(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # --------------------------------------------------------
+    # Find artisan profile
+    # --------------------------------------------------------
+
+    artisan = (
+        db.query(Artisan)
+        .filter(
+            Artisan.user_id == current_user.id
+        )
+        .first()
+    )
+
+    if not artisan:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seller profile not found"
+        )
+
+    # --------------------------------------------------------
+    # Get artisan products
+    # --------------------------------------------------------
+
+    products = (
+        db.query(Product)
+        .filter(
+            Product.artisan_id == artisan.id
+        )
+        .order_by(Product.id.desc())
+        .all()
+    )
+
+    return products
+
+
+# ============================================================
 # GET ALL ACTIVE PRODUCTS
 # ============================================================
 
@@ -140,6 +188,7 @@ def get_all_products(
 
     products = (
         query
+        .order_by(Product.id.desc())
         .offset(skip)
         .limit(limit)
         .all()
@@ -150,6 +199,8 @@ def get_all_products(
 
 # ============================================================
 # GET SINGLE PRODUCT
+# IMPORTANT:
+# Keep this AFTER /my
 # ============================================================
 
 @router.get(
@@ -176,73 +227,3 @@ def get_product(
         )
 
     return product
-
-
-@router.get(
-    "/my",
-    response_model=list[ProductResponse]
-)
-def get_my_products(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    artisan = db.query(Artisan).filter(
-        Artisan.user_id == current_user.id
-    ).first()
-
-    if not artisan:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seller profile not found"
-        )
-
-    products = db.query(Product).filter(
-        Product.artisan_id == artisan.id
-    ).all()
-
-    return products
-
-# ============================================================
-# GET CURRENT ARTISAN'S PRODUCTS
-# ============================================================
-
-@router.get(
-    "/mine/list",
-    response_model=list[ProductResponse]
-)
-def get_my_products(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    # --------------------------------------------------------
-    # Find artisan profile
-    # --------------------------------------------------------
-
-    artisan = (
-        db.query(Artisan)
-        .filter(
-            Artisan.user_id == current_user.id
-        )
-        .first()
-    )
-
-    if not artisan:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only artisans can access their products"
-        )
-
-    # --------------------------------------------------------
-    # Get artisan's products
-    # --------------------------------------------------------
-
-    products = (
-        db.query(Product)
-        .filter(
-            Product.artisan_id == artisan.id
-        )
-        .order_by(Product.id.desc())
-        .all()
-    )
-
-    return products

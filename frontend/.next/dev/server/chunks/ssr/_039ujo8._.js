@@ -579,32 +579,53 @@ __turbopack_context__.s([
     "api",
     ()=>api
 ]);
+// ============================================================
+// API CONFIG
+// ============================================================
 const API_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") || "http://127.0.0.1:8000";
 // ============================================================
 // GENERIC API FETCH
 // ============================================================
 async function apiFetch(endpoint, options = {}) {
+    // ----------------------------------------------------------
+    // Get JWT token
+    // ----------------------------------------------------------
     const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
+    // ----------------------------------------------------------
+    // Headers
+    // ----------------------------------------------------------
     const headers = {
         "Content-Type": "application/json",
         ...options.headers || {}
     };
+    // ----------------------------------------------------------
+    // Authorization
+    // ----------------------------------------------------------
     if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
     ;
+    // ----------------------------------------------------------
+    // Request
+    // ----------------------------------------------------------
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers
     });
+    // ----------------------------------------------------------
+    // Error handling
+    // ----------------------------------------------------------
     if (!response.ok) {
         let message = `API error: ${response.status}`;
         try {
             const errorData = await response.json();
             message = errorData.detail || errorData.message || message;
         } catch  {
-        // ignore JSON parsing error
+        // Ignore JSON parsing error
         }
         throw new Error(message);
     }
+    // ----------------------------------------------------------
+    // Response
+    // ----------------------------------------------------------
     return response.json();
 }
 const api = {
@@ -624,8 +645,15 @@ const api = {
         ;
         return response;
     },
+    // ----------------------------------------------------------
+    // Current user
+    // ----------------------------------------------------------
     getMe: ()=>apiFetch("/auth/me"),
+    // Keep this for older pages if needed
     getCurrentUser: ()=>apiFetch("/auth/me"),
+    // ----------------------------------------------------------
+    // Logout
+    // ----------------------------------------------------------
     logout: ()=>{
         if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
         ;
@@ -665,8 +693,17 @@ const api = {
         searchParams.set("limit", String(params?.limit ?? 50));
         return apiFetch(`/products/?${searchParams.toString()}`);
     },
+    // ----------------------------------------------------------
+    // Single product
+    // ----------------------------------------------------------
     getProduct: (productId)=>apiFetch(`/products/${productId}`),
+    // ----------------------------------------------------------
+    // Seller's products
+    // ----------------------------------------------------------
     getMyProducts: ()=>apiFetch("/products/my"),
+    // ----------------------------------------------------------
+    // CREATE PRODUCT
+    // ----------------------------------------------------------
     createProduct: (data)=>apiFetch("/products/", {
             method: "POST",
             body: JSON.stringify(data)
@@ -675,6 +712,9 @@ const api = {
     // PRODUCT IMAGES
     // ==========================================================
     getProductImages: (productId)=>apiFetch(`/product-image/product/${productId}`),
+    // ----------------------------------------------------------
+    // Attach image to product
+    // ----------------------------------------------------------
     createProductImage: (data)=>apiFetch("/product-image/", {
             method: "POST",
             body: JSON.stringify({
@@ -689,6 +729,7 @@ const api = {
     uploadProductImage: async (file)=>{
         const formData = new FormData();
         formData.append("file", file);
+        // Get JWT
         const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
         const headers = {};
         if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
@@ -704,7 +745,7 @@ const api = {
                 const errorData = await response.json();
                 message = errorData.detail || errorData.message || message;
             } catch  {
-            // ignore
+            // Ignore
             }
             throw new Error(message);
         }
@@ -716,6 +757,7 @@ const api = {
     generateProductListing: async (file)=>{
         const formData = new FormData();
         formData.append("file", file);
+        // Get JWT
         const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
         const headers = {};
         if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
@@ -731,7 +773,7 @@ const api = {
                 const errorData = await response.json();
                 message = errorData.detail || errorData.message || message;
             } catch  {
-            // ignore
+            // Ignore
             }
             throw new Error(message);
         }
