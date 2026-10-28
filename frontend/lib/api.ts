@@ -24,6 +24,16 @@ export type LoginResponse = {
   token_type: string;
 };
 
+export type OrderItemInput = { product_id: number; quantity: number };
+export type OrderItem = { id: number; product_id: number; quantity: number; price: number };
+export type Order = {
+  id: number;
+  user_id: number;
+  total_amount: number;
+  status: string;
+  items?: OrderItem[];
+};
+
 
 // ============================================================
 // AI LISTING TYPES
@@ -339,6 +349,23 @@ export const api = {
   },
 
 
+  register: (data: { name: string; email: string; password: string; role?: "customer" | "artisan" }) =>
+    apiFetch<User>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ ...data, role: data.role ?? "customer" }),
+    }),
+
+  googleLogin: async (credential: string): Promise<LoginResponse> => {
+    const response = await apiFetch<LoginResponse>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+    });
+    if (typeof window !== "undefined" && response.access_token) {
+      localStorage.setItem("hastkatha_token", response.access_token);
+    }
+    return response;
+  },
+
   // ----------------------------------------------------------
   // Current user
   // ----------------------------------------------------------
@@ -566,6 +593,14 @@ export const api = {
       }
     ),
 
+
+  createOrder: (items: OrderItemInput[]) =>
+    apiFetch<Order>("/orders/", {
+      method: "POST",
+      body: JSON.stringify({ items }),
+    }),
+
+  getOrders: () => apiFetch<Order[]>("/orders/"),
 
   // ==========================================================
   // PRODUCT IMAGES
