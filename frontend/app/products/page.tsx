@@ -11,12 +11,13 @@ import {
   Sparkles,
 } from "lucide-react";
 //import { api, Craft } from "@/lib/api";
-import { api, Craft, Product } from "@/lib/api";
+import { API_URL, api, Craft, Product, ProductImage } from "@/lib/api";
 
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [crafts, setCrafts] = useState<Craft[]>([]);
+  const [productImages, setProductImages] = useState<Record<number, string>>({});
   const [search, setSearch] = useState("");
   const [selectedCraft, setSelectedCraft] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,26 @@ export default function ProductsPage() {
 
       setProducts(productData);
       setCrafts(craftData);
+
+      // Load thumbnails separately: products remain visible if an image is missing.
+      const imageResults = await Promise.allSettled(
+        productData.slice(0, 18).map(async (product) => ({
+          productId: product.id,
+          images: await api.getProductImages(product.id),
+        }))
+      );
+      const imageMap: Record<number, string> = {};
+      for (const result of imageResults) {
+        if (result.status !== "fulfilled") continue;
+        const images: ProductImage[] = result.value.images;
+        const image = images.find((item) => item.is_primary) || images[0];
+        if (image?.image_url) {
+          imageMap[result.value.productId] = image.image_url.startsWith("http")
+            ? image.image_url
+            : API_URL + (image.image_url.startsWith("/") ? "" : "/") + image.image_url;
+        }
+      }
+      setProductImages(imageMap);
     } catch (err) {
       setError(
         err instanceof Error
@@ -225,11 +246,14 @@ export default function ProductsPage() {
                     className="market-product-card"
                   >
                     <div className="product-placeholder">
-                      <ShoppingBag size={34} />
-
-                      <span>
-                        HASTKATHA
-                      </span>
+                      {productImages[product.id] ? (
+                        <img className="market-product-image" src={productImages[product.id]} alt={product.name} loading="lazy" />
+                      ) : (
+                        <>
+                          <ShoppingBag size={34} />
+                          <span>HASTKATHA</span>
+                        </>
+                      )}
                     </div>
 
                     <div className="product-card-body">
