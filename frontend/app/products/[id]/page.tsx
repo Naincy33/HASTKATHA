@@ -66,17 +66,17 @@ export default function ProductDetailPage() {
           {imageUrl ? <img className="product-real-image" src={imageUrl} alt={product.name} /> : <><ShoppingBag size={70} /><span>HANDCRAFTED</span></>}
         </div>
         <div className="product-detail-info">
-          {craft && <Link href={\`/crafts/\${craft.id}\`} className="pill product-craft-link">{craft.name}</Link>}
+          {craft && <Link href={`/crafts/${craft.id}`} className="pill product-craft-link">{craft.name}</Link>}
           <h1>{product.name}</h1>
           <p className="product-detail-description">{product.description || "A handcrafted product made by an Indian artisan."}</p>
           <div className="product-detail-price">₹{product.price.toLocaleString("en-IN")}</div>
-          <div className="product-detail-meta"><div><Package size={18} /><span>{product.stock > 0 ? \`\${product.stock} available\` : "Out of stock"}</span></div>{product.material && <div><Sparkles size={18} /><span>Material: {product.material}</span></div>}{craft?.state && <div><MapPin size={18} /><span>{craft.state}{craft.region ? \` · \${craft.region}\` : ""}</span></div>}</div>
+          <div className="product-detail-meta"><div><Package size={18} /><span>{product.stock > 0 ? `${product.stock} available` : "Out of stock"}</span></div>{product.material && <div><Sparkles size={18} /><span>Material: {product.material}</span></div>}{craft?.state && <div><MapPin size={18} /><span>{craft.state}{craft.region ? ` · ${craft.region}` : ""}</span></div>}</div>
           {notice && <p className="cart-inline-success"><CheckCircle2 size={17} /> {notice} <Link href="/cart">View cart</Link></p>}
           <div className="product-actions"><button className="btn btn-primary" onClick={() => handleAddToCart()} disabled={product.stock <= 0}><ShoppingBag size={18} /> Add to cart</button><button className="btn btn-soft" onClick={() => handleAddToCart(true)} disabled={product.stock <= 0}>Buy now <ArrowRight size={17} /></button></div>
           <div className="artisan-note"><strong>Supporting Indian artisans</strong><p>Your purchase helps keep traditional craft practices connected to modern markets.</p></div>
         </div>
       </section>
-      {craft && <section className="product-story"><div><div className="section-kicker">THE CRAFT BEHIND IT</div><h2>{craft.name}</h2></div><div><p>{craft.description || "Explore the tradition, region and techniques connected to this product."}</p><Link href={\`/crafts/\${craft.id}\`} className="card-link">Explore this craft <ArrowRight size={16} /></Link></div></section>}
+      {craft && <section className="product-story"><div><div className="section-kicker">THE CRAFT BEHIND IT</div><h2>{craft.name}</h2></div><div><p>{craft.description || "Explore the tradition, region and techniques connected to this product."}</p><Link href={`/crafts/${craft.id}`} className="card-link">Explore this craft <ArrowRight size={16} /></Link></div></section>}
       <section className="market-ai-banner"><div className="market-ai-icon"><Sparkles size={22} /></div><div><span>CURIOUS ABOUT THIS PRODUCT?</span><h3>Ask HASTKATHA about its craft.</h3><p>Learn about the region, tradition, materials and heritage behind it.</p></div><Link href="/ai-assistant" className="market-ai-link">Ask HASTKATHA <ArrowRight size={17} /></Link></section>
     </div></main>
   );
