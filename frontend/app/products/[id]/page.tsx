@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, Sparkles, Package, CheckCircle2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { api, Craft, Product, ProductImage } from "@/lib/api";
+import { API_URL, api, Craft, Product, ProductImage } from "@/lib/api";
 import { addToCart } from "@/lib/cart";
 
 export default function ProductDetailPage() {
@@ -54,7 +54,7 @@ export default function ProductDetailPage() {
   if (error || !product) return <main className="archive-page"><div className="container"><Link href="/products" className="back-link"><ArrowLeft size={17} /> Back to marketplace</Link><div className="market-empty"><h3>Product not found</h3><p>{error || "This product is no longer available."}</p></div></div></main>;
 
   const imageUrl = image?.image_url
-    ? (image.image_url.startsWith("http") ? image.image_url : "http://127.0.0.1:8000" + (image.image_url.startsWith("/") ? "" : "/") + image.image_url)
+    ? (image.image_url.startsWith("http") ? image.image_url : API_URL + (image.image_url.startsWith("/") ? "" : "/") + image.image_url)
     : null;
 
   return (
