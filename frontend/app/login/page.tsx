@@ -3,352 +3,57 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { ArrowRight, Eye, EyeOff, Leaf, ShieldCheck } from "lucide-react";
 import { api } from "@/lib/api";
-
+import GoogleIdentity from "@/components/GoogleIdentity";
 
 export default function LoginPage() {
-
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-
-  async function handleLogin(
-    event: React.FormEvent
-  ) {
-
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError("");
     setLoading(true);
-
     try {
-
-      // ====================================================
-      // LOGIN
-      // api.login automatically stores JWT token
-      // ====================================================
-
-      await api.login(
-        email,
-        password
-      );
-
-
-      // ====================================================
-      // GET CURRENT USER
-      // ====================================================
-
-      const user =
-        await api.getCurrentUser();
-
-
-      // ====================================================
-      // ROLE BASED REDIRECT
-      // ====================================================
-
-      if (user.role === "artisan") {
-
-        router.push("/seller");
-
-      } else if (user.role === "admin") {
-
-        router.push("/admin");
-
-      } else {
-
-        router.push("/");
-
-      }
-
+      await api.login(email.trim(), password);
+      const user = await api.getMe();
+      const next = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
+      if (next && next.startsWith("/") && !next.startsWith("//")) router.push(next);
+      else router.push(user.role === "artisan" ? "/seller" : user.role === "admin" ? "/admin" : "/");
+      router.refresh();
     } catch (err) {
-
-      console.error(
-        "Login failed:",
-        err
-      );
-
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Login failed. Please check your credentials."
-      );
-
+      setError(err instanceof Error ? err.message : "Login failed. Check your credentials.");
     } finally {
-
       setLoading(false);
-
     }
   }
 
-
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 20px",
-      }}
-    >
-
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "640px",
-        }}
-      >
-
-        {/* Brand */}
-
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "48px",
-          }}
-        >
-
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 700,
-              letterSpacing: "4px",
-              marginBottom: "18px",
-            }}
-          >
-            HASTKATHA
-          </div>
-
-
-          <h1
-            style={{
-              fontFamily:
-                "Georgia, serif",
-              fontSize: "56px",
-              lineHeight: 1,
-              margin: 0,
-              marginBottom: "20px",
-            }}
-          >
-            Welcome back
-          </h1>
-
-
-          <p
-            style={{
-              fontSize: "20px",
-              color: "#686860",
-              margin: 0,
-            }}
-          >
-            Sign in to continue to
-            HASTKATHA.
-          </p>
-
-        </div>
-
-
-        {/* Login Card */}
-
-        <div
-          style={{
-            background: "#fff",
-            border: "1px solid #ddd",
-            borderRadius: "28px",
-            padding: "48px",
-          }}
-        >
-
-          <form
-            onSubmit={handleLogin}
-          >
-
-            {/* Email */}
-
-            <div
-              style={{
-                marginBottom: "28px",
-              }}
-            >
-
-              <label
-                htmlFor="email"
-                style={{
-                  display: "block",
-                  fontSize: "18px",
-                  fontWeight: 700,
-                  marginBottom: "10px",
-                }}
-              >
-                Email
-              </label>
-
-
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                placeholder="you@example.com"
-                required
-                autoComplete="email"
-                style={{
-                  width: "100%",
-                  padding: "18px",
-                  borderRadius: "14px",
-                  border: "1px solid #ccc",
-                  fontSize: "17px",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-            </div>
-
-
-            {/* Password */}
-
-            <div
-              style={{
-                marginBottom: "28px",
-              }}
-            >
-
-              <label
-                htmlFor="password"
-                style={{
-                  display: "block",
-                  fontSize: "18px",
-                  fontWeight: 700,
-                  marginBottom: "10px",
-                }}
-              >
-                Password
-              </label>
-
-
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-                style={{
-                  width: "100%",
-                  padding: "18px",
-                  borderRadius: "14px",
-                  border: "1px solid #ccc",
-                  fontSize: "17px",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-            </div>
-
-
-            {/* Error */}
-
-            {error && (
-
-              <div
-                style={{
-                  background: "#fff1ef",
-                  border: "1px solid #e7a49a",
-                  color: "#a43d2d",
-                  padding: "14px 16px",
-                  borderRadius: "12px",
-                  marginBottom: "22px",
-                  fontSize: "14px",
-                }}
-              >
-                {error}
-              </div>
-
-            )}
-
-
-            {/* Submit */}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                padding: "18px",
-                borderRadius: "14px",
-                border: "none",
-                background:
-                  loading
-                    ? "#7a827b"
-                    : "#1d261f",
-                color: "#fff",
-                fontSize: "17px",
-                fontWeight: 700,
-                cursor:
-                  loading
-                    ? "not-allowed"
-                    : "pointer",
-              }}
-            >
-
-              {loading
-                ? "Signing in..."
-                : "Sign in"}
-
-            </button>
-
-          </form>
-
-        </div>
-
-
-        {/* Register */}
-
-        <div
-          style={{
-            textAlign: "center",
-            marginTop: "32px",
-            fontSize: "17px",
-            color: "#686860",
-          }}
-        >
-
-          Don't have an account?{" "}
-
-          <Link
-            href="/register"
-            style={{
-              fontWeight: 700,
-              color: "#1d261f",
-              textDecoration: "none",
-            }}
-          >
-            Create account
-          </Link>
-
-        </div>
-
+    <main className="auth-page">
+      <div className="auth-story">
+        <Link href="/" className="auth-brand"><span className="brand-mark">ह</span> HASTKATHA</Link>
+        <div className="auth-story-copy"><span className="auth-eyebrow"><Leaf size={15} /> STORIES WOVEN BY HAND</span><h1>Welcome<br /><i>back home.</i></h1><p>Find meaningful objects, learn the stories behind them and support the hands that keep Indian craft alive.</p><div className="auth-promise"><ShieldCheck size={19} /> Your account brings your cart and orders together.</div></div>
+        <div className="auth-story-foot">DISCOVER · EMPOWER · PRESERVE</div>
       </div>
-
+      <section className="auth-form-side">
+        <div className="auth-mobile-brand"><Link href="/" className="auth-brand"><span className="brand-mark">ह</span> HASTKATHA</Link></div>
+        <div className="auth-form-wrap">
+          <p className="auth-eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2>Sign in to HASTKATHA</h2><p className="auth-muted">Your next favourite craft is waiting.</p>
+          <div className="auth-google"><GoogleIdentity /></div><div className="auth-divider"><span>or continue with email</span></div>
+          <form className="auth-form" onSubmit={handleLogin}>
+            <label>Email address<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required autoComplete="email" /></label>
+            <label>Password<span className="auth-password"><input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required autoComplete="current-password" /><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></span></label>
+            {error && <div className="auth-error" role="alert">{error}</div>}
+            <button className="auth-submit" type="submit" disabled={loading}>{loading ? "Signing in…" : "Sign in"} <ArrowRight size={17} /></button>
+          </form>
+          <p className="auth-switch">New to HASTKATHA? <Link href="/register">Create an account</Link></p>
+        </div>
+      </section>
     </main>
   );
 }

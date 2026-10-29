@@ -2,14 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 
-# Import models so SQLAlchemy knows about all tables
-from app.models import User, Artisan, Craft, Product, ProductImage
+# Import models so SQLAlchemy knows about all tables, including checkout records.
+from app.models import User, Artisan, Craft, Product, ProductImage, Order, OrderItem
 
 from app.routers import auth
 from app.routers import artisan
 from app.routers import craft
-from app.routers import auth
-from app.routers import artisan
 from app.routers import product
 from app.routers import product_image
 from app.routers import order
@@ -53,8 +51,6 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(artisan.router)
 app.include_router(craft.router)
-app.include_router(auth.router)
-app.include_router(artisan.router)
 app.include_router(product.router)
 app.include_router(product_image.router)
 app.include_router(order.router)
@@ -72,12 +68,6 @@ def root():
     }
 
 
-@app.get("/health")
-def health_check():
-    return {
-        "status": "healthy"
-    }
-    
 @app.get("/health")
 def health_check():
     return {

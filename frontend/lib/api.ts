@@ -24,6 +24,35 @@ export type LoginResponse = {
   token_type: string;
 };
 
+export type OrderItemInput = { product_id: number; quantity: number };
+export type CheckoutOrderInput = {
+  items: OrderItemInput[];
+  shipping_name: string;
+  shipping_email: string;
+  shipping_phone: string;
+  shipping_address: string;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_pincode: string;
+  payment_method: "cod";
+};
+export type OrderItem = { id: number; product_id: number; quantity: number; price: number };
+export type Order = {
+  id: number;
+  user_id: number;
+  total_amount: number;
+  status: string;
+  shipping_name?: string | null;
+  shipping_email?: string | null;
+  shipping_phone?: string | null;
+  shipping_address?: string | null;
+  shipping_city?: string | null;
+  shipping_state?: string | null;
+  shipping_pincode?: string | null;
+  payment_method?: string | null;
+  items?: OrderItem[];
+};
+
 
 // ============================================================
 // AI LISTING TYPES
@@ -339,6 +368,23 @@ export const api = {
   },
 
 
+  register: (data: { name: string; email: string; password: string; role?: "customer" | "artisan" }) =>
+    apiFetch<User>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ ...data, role: data.role ?? "customer" }),
+    }),
+
+  googleLogin: async (credential: string): Promise<LoginResponse> => {
+    const response = await apiFetch<LoginResponse>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+    });
+    if (typeof window !== "undefined" && response.access_token) {
+      localStorage.setItem("hastkatha_token", response.access_token);
+    }
+    return response;
+  },
+
   // ----------------------------------------------------------
   // Current user
   // ----------------------------------------------------------
@@ -566,6 +612,14 @@ export const api = {
       }
     ),
 
+
+  createOrder: (data: CheckoutOrderInput) =>
+    apiFetch<Order>("/orders/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  getOrders: () => apiFetch<Order[]>("/orders/"),
 
   // ==========================================================
   // PRODUCT IMAGES

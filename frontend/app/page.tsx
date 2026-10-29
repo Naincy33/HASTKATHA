@@ -114,33 +114,6 @@ export default function Home() {
 
   return (
     <>
-      {/* ======================================================
-          NAVBAR
-      ====================================================== */}
-
-      <nav className="nav">
-        <Link href="/" className="brand">
-          <span className="brand-mark">ह</span>
-          HASTKATHA
-        </Link>
-
-        <div className="navlinks">
-          <a href="#discover">Discover</a>
-
-          <Link href="/products">Shop</Link>
-
-          <a href="#intelligence">Intelligence</a>
-
-          <a href="#mission">Mission</a>
-
-          <Link href="/seller">Sell with HASTKATHA</Link>
-        </div>
-
-        <Link href="/ai-assistant" className="nav-cta">
-          Ask HASTKATHA
-        </Link>
-      </nav>
-
       <main>
         {/* ====================================================
             HERO

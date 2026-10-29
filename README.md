@@ -559,3 +559,63 @@ Technology should not erase the human story behind handmade products. It should 
   *Built to empower artisans, connect communities, and preserve India's craft legacy.*
 
 </p>
+
+---
+
+## Phase 2 — Customer Experience
+
+Phase 2 introduces a customer journey across registration, sign-in, product discovery, cart, checkout and order history.
+
+### Customer routes
+
+| Route | Purpose |
+|---|---|
+| \`/register\` | Create a customer account with email and password |
+| \`/login\` | Sign in using email/password; Google Identity Services is available after OAuth configuration |
+| \`/products\` | Browse artisan products and available product photos |
+| \`/products/[id]\` | Read product details and add it to the cart |
+| \`/cart\` | Edit quantities, remove items and view the subtotal |
+| \`/checkout\` | Enter delivery details and place a Cash on Delivery order |
+| \`/orders\` | View the signed-in customer's order history and status |
+
+The cart is stored in the current browser's local storage. Orders are stored in PostgreSQL and the backend validates product availability and inventory when placing an order.
+
+### Database migration
+
+The checkout flow adds delivery and payment-method fields to the existing \`orders\` table. Start the backend at least once so the table exists, then run the migration against the same PostgreSQL database configured in \`backend/.env\`:
+
+\`\`\`bash
+cd backend
+set -a; source .env; set +a\npsql "$DATABASE_URL" -f migrations/phase2_customer_checkout.sql
+\`\`\`
+
+Do not skip this migration on an existing database. \`Base.metadata.create_all()\` creates missing tables but does not add columns to a table that already exists.
+
+### Google sign-in setup
+
+1. In Google Cloud Console, configure OAuth consent and create a **Web application** OAuth client.
+2. Add your frontend origin (for local development, \`http://localhost:3000\`) to **Authorized JavaScript origins**.
+3. Add the same client ID to both environment files:
+
+Frontend \`frontend/.env.local\`:
+
+\`\`\`env
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+\`\`\`
+
+Backend \`backend/.env\`:
+
+\`\`\`env
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+\`\`\`
+
+4. Install backend dependencies with \`pip install -r requirements.txt\`, restart both servers and test sign-in using a Google account.
+
+The backend verifies the Google ID token using Google's library; the frontend client ID is public configuration, not a secret. Keep \`JWT_SECRET_KEY\`, database credentials and any other server secrets private.
+
+### Current checkout limitations
+
+- Cash on Delivery is the only order method accepted by the backend.
+- Online payment collection and payment-provider verification are not implemented; selecting online payment does not charge a customer.
+- Shipping charges are not calculated. The displayed amount is the product subtotal.
+- Orders are recorded and stock is reduced when an order is placed. Add a production delivery/cancellation workflow before using this with real customers.
