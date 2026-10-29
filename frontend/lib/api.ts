@@ -25,12 +25,31 @@ export type LoginResponse = {
 };
 
 export type OrderItemInput = { product_id: number; quantity: number };
+export type CheckoutOrderInput = {
+  items: OrderItemInput[];
+  shipping_name: string;
+  shipping_email: string;
+  shipping_phone: string;
+  shipping_address: string;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_pincode: string;
+  payment_method: "cod";
+};
 export type OrderItem = { id: number; product_id: number; quantity: number; price: number };
 export type Order = {
   id: number;
   user_id: number;
   total_amount: number;
   status: string;
+  shipping_name?: string | null;
+  shipping_email?: string | null;
+  shipping_phone?: string | null;
+  shipping_address?: string | null;
+  shipping_city?: string | null;
+  shipping_state?: string | null;
+  shipping_pincode?: string | null;
+  payment_method?: string | null;
   items?: OrderItem[];
 };
 
@@ -594,10 +613,10 @@ export const api = {
     ),
 
 
-  createOrder: (items: OrderItemInput[]) =>
+  createOrder: (data: CheckoutOrderInput) =>
     apiFetch<Order>("/orders/", {
       method: "POST",
-      body: JSON.stringify({ items }),
+      body: JSON.stringify(data),
     }),
 
   getOrders: () => apiFetch<Order[]>("/orders/"),
