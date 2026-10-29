@@ -56,7 +56,7 @@ export default function SiteHeader() {
           {loggedIn ? <button className="site-nav-login" onClick={logout}>Sign out</button> : <Link href="/login" className="site-nav-login"><UserRound size={15} /> Sign in</Link>}
         </nav>
         <div className="site-header-actions">
-          <Link href="/cart" className="site-cart" aria-label={\`Shopping cart, \${count} items\`}><ShoppingBag size={20} /><span>Cart</span>{count > 0 && <b>{count > 99 ? "99+" : count}</b>}</Link>
+          <Link href="/cart" className="site-cart" aria-label={`Shopping cart, ${count} items`}><ShoppingBag size={20} /><span>Cart</span>{count > 0 && <b>{count > 99 ? "99+" : count}</b>}</Link>
           <button className="site-menu-toggle" type="button" onClick={() => setOpen(!open)} aria-label={open ? "Close navigation" : "Open navigation"}>{open ? <X size={22} /> : <Menu size={22} />}</button>
         </div>
       </div>
