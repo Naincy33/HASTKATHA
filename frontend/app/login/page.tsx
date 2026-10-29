@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Leaf, ShieldCheck } from "lucide-react";
 import { api } from "@/lib/api";
-import GoogleIdentity from "@/app/GoogleIdentity";
+import GoogleIdentity from "@/components/GoogleIdentity";
 
 export default function LoginPage() {
   const router = useRouter();
