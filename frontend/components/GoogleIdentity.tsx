@@ -38,7 +38,9 @@ export default function GoogleIdentity() {
           try {
             await api.googleLogin(credential);
             const user = await api.getMe();
-            router.push(user.role === "artisan" ? "/seller" : user.role === "admin" ? "/admin" : "/");
+            const next = new URLSearchParams(window.location.search).get("next");
+            if (next && next.startsWith("/") && !next.startsWith("//")) router.push(next);
+            else router.push(user.role === "artisan" ? "/seller" : user.role === "admin" ? "/admin" : "/");
             router.refresh();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Google sign-in failed.");
