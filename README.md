@@ -586,7 +586,7 @@ The checkout flow adds delivery and payment-method fields to the existing \`orde
 
 \`\`\`bash
 cd backend
-psql "$DATABASE_URL" -f migrations/phase2_customer_checkout.sql
+set -a; source .env; set +a\npsql "$DATABASE_URL" -f migrations/phase2_customer_checkout.sql
 \`\`\`
 
 Do not skip this migration on an existing database. \`Base.metadata.create_all()\` creates missing tables but does not add columns to a table that already exists.
